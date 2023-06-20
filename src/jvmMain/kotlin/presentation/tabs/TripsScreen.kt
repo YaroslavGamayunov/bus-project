@@ -12,19 +12,17 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.Table
 import com.seanproctor.datatable.TableColumnDefinition
 import data.BusRepository
-import domain.BusEntity
-import presentation.common.AsyncImage
-import presentation.common.loadImageBitmap
+import domain.TripEntity
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun BusesScreen(buses: List<BusEntity>) {
+fun TripsScreen(trips: List<TripEntity>) {
     var isShowingAddDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -48,42 +46,39 @@ fun BusesScreen(buses: List<BusEntity>) {
                             Text("Id")
                         },
                         TableColumnDefinition {
-                            Text("Model name")
+                            Text("Route id")
                         },
                         TableColumnDefinition {
-                            Text("Production year")
+                            Text("Bus id")
                         },
                         TableColumnDefinition {
-                            Text("Image")
+                            Text("Start date")
                         },
+                        TableColumnDefinition {
+                            Text("End date")
+                        }
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    buses.forEach { bus ->
+                    trips.forEach { trip ->
                         row {
-                            cell { Text(bus.id.toString()) }
-                            cell { Text(bus.modelName) }
-                            cell { Text(bus.productionYear.toString()) }
+                            cell { Text(trip.id.toString()) }
+                            cell { Text(trip.routeId.toString()) }
+                            cell { Text(trip.busId.toString()) }
                             cell {
-                                AsyncImage(
-                                    load = { loadImageBitmap(bus.modelImageUrl) },
-                                    painterFor = { BitmapPainter(it) },
-                                    contentScale = ContentScale.FillHeight,
-                                    contentDescription = "",
-                                    modifier = Modifier.height(80.dp).padding(10.dp)
-                                )
+                                Text(trip.startTime.toString())
+                            }
+                            cell {
+                                Text(trip.endTime.toString())
                             }
                         }
                     }
                 }
 
                 if (isShowingAddDialog) {
-                    AddBusDialog(
-                        onSubmit = { productionYear, modelId ->
-                            BusRepository.addBus(
-                                productionYear = productionYear,
-                                modelId = modelId
-                            )
+                    AddTripDialog(
+                        onSubmit = { start, end, busId, routeId ->
+                            BusRepository.addTrip(start, end, busId, routeId)
                             isShowingAddDialog = false
                         },
                         onClose = {
@@ -103,12 +98,18 @@ fun BusesScreen(buses: List<BusEntity>) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun AddBusDialog(
+private fun AddTripDialog(
     onClose: () -> Unit,
-    onSubmit: (productionYear: Int, modelId: Int) -> Unit
+    onSubmit: (start: LocalDate, end: LocalDate, busId: Int, routeId: Int) -> Unit
 ) {
-    var productionYear by remember { mutableStateOf("") }
-    var modelId by remember { mutableStateOf("") }
+    var y1 by remember { mutableStateOf("") }
+    var d1 by remember { mutableStateOf("") }
+
+    var y2 by remember { mutableStateOf("") }
+    var d2 by remember { mutableStateOf("") }
+
+    var busId by remember { mutableStateOf("") }
+    var routeId by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onClose,
@@ -116,7 +117,12 @@ private fun AddBusDialog(
             Button(
                 modifier = Modifier.fillMaxWidth().padding(all = 16.dp),
                 onClick = {
-                    onSubmit(productionYear.toInt(), modelId.toInt())
+                    onSubmit(
+                        LocalDate.ofYearDay(y1.toInt(), d1.toInt()),
+                        LocalDate.ofYearDay(y2.toInt(), d2.toInt()),
+                        busId.toInt(),
+                        routeId.toInt()
+                    )
                 },
                 content = {
                     Text("Submit")
@@ -127,20 +133,56 @@ private fun AddBusDialog(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TextField(
                     modifier = Modifier.padding(all = 16.dp),
-                    value = productionYear,
+                    value = y1,
                     onValueChange = { text ->
-                        productionYear = text
+                        y1 = text
                     },
-                    label = { Text("Production year") },
+                    label = { Text("Year of start") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
                 TextField(
                     modifier = Modifier.padding(all = 16.dp),
-                    value = modelId,
+                    value = d1,
                     onValueChange = { text ->
-                        modelId = text
+                        d1 = text
                     },
-                    label = { Text("Model id") },
+                    label = { Text("Day of start") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                TextField(
+                    modifier = Modifier.padding(all = 16.dp),
+                    value = y2,
+                    onValueChange = { text ->
+                        y2 = text
+                    },
+                    label = { Text("Year of end") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                TextField(
+                    modifier = Modifier.padding(all = 16.dp),
+                    value = d2,
+                    onValueChange = { text ->
+                        d2 = text
+                    },
+                    label = { Text("Day of end") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                TextField(
+                    modifier = Modifier.padding(all = 16.dp),
+                    value = busId,
+                    onValueChange = { text ->
+                        busId = text
+                    },
+                    label = { Text("Bus id") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                TextField(
+                    modifier = Modifier.padding(all = 16.dp),
+                    value = routeId,
+                    onValueChange = { text ->
+                        routeId = text
+                    },
+                    label = { Text("Route id") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }

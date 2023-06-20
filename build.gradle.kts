@@ -22,10 +22,19 @@ kotlin {
     sourceSets {
         val jvmMain by getting {
             val exposedVersion: String by project
+            val h2Version: String by project
+
             dependencies {
                 implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+                implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
                 implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
                 implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+                implementation("com.h2database:h2:$h2Version")
+                implementation("org.slf4j:slf4j-simple:1.7.9" )
+                implementation("com.seanproctor:datatable:0.2.1")
+                implementation("io.github.vanpra.compose-material-dialogs:color:0.9.0")
+                implementation("io.github.vanpra.compose-material-dialogs:core:0.9.0")
+
                 implementation(compose.desktop.currentOs)
             }
         }

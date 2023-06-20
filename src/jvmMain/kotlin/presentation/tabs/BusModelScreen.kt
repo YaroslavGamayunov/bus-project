@@ -20,11 +20,12 @@ import com.seanproctor.datatable.Table
 import com.seanproctor.datatable.TableColumnDefinition
 import data.BusRepository
 import domain.BusEntity
+import domain.BusModelEntity
 import presentation.common.AsyncImage
 import presentation.common.loadImageBitmap
 
 @Composable
-fun BusesScreen(buses: List<BusEntity>) {
+fun BusModelScreen(busModels: List<BusModelEntity>) {
     var isShowingAddDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -51,22 +52,18 @@ fun BusesScreen(buses: List<BusEntity>) {
                             Text("Model name")
                         },
                         TableColumnDefinition {
-                            Text("Production year")
-                        },
-                        TableColumnDefinition {
                             Text("Image")
                         },
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    buses.forEach { bus ->
+                    busModels.forEach { model ->
                         row {
-                            cell { Text(bus.id.toString()) }
-                            cell { Text(bus.modelName) }
-                            cell { Text(bus.productionYear.toString()) }
+                            cell { Text(model.id.toString()) }
+                            cell { Text(model.name) }
                             cell {
                                 AsyncImage(
-                                    load = { loadImageBitmap(bus.modelImageUrl) },
+                                    load = { loadImageBitmap(model.imageUrl) },
                                     painterFor = { BitmapPainter(it) },
                                     contentScale = ContentScale.FillHeight,
                                     contentDescription = "",
@@ -78,11 +75,10 @@ fun BusesScreen(buses: List<BusEntity>) {
                 }
 
                 if (isShowingAddDialog) {
-                    AddBusDialog(
-                        onSubmit = { productionYear, modelId ->
-                            BusRepository.addBus(
-                                productionYear = productionYear,
-                                modelId = modelId
+                    AddModelDialog(
+                        onSubmit = { name, url ->
+                            BusRepository.addModel(
+                                name, url
                             )
                             isShowingAddDialog = false
                         },
@@ -103,12 +99,12 @@ fun BusesScreen(buses: List<BusEntity>) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun AddBusDialog(
+private fun AddModelDialog(
     onClose: () -> Unit,
-    onSubmit: (productionYear: Int, modelId: Int) -> Unit
+    onSubmit: (name: String, imageUrl: String) -> Unit
 ) {
-    var productionYear by remember { mutableStateOf("") }
-    var modelId by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var imageUrl by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onClose,
@@ -116,7 +112,7 @@ private fun AddBusDialog(
             Button(
                 modifier = Modifier.fillMaxWidth().padding(all = 16.dp),
                 onClick = {
-                    onSubmit(productionYear.toInt(), modelId.toInt())
+                    onSubmit(name, imageUrl)
                 },
                 content = {
                     Text("Submit")
@@ -127,20 +123,20 @@ private fun AddBusDialog(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 TextField(
                     modifier = Modifier.padding(all = 16.dp),
-                    value = productionYear,
+                    value = name,
                     onValueChange = { text ->
-                        productionYear = text
+                        name = text
                     },
-                    label = { Text("Production year") },
+                    label = { Text("Model name") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
                 TextField(
                     modifier = Modifier.padding(all = 16.dp),
-                    value = modelId,
+                    value = imageUrl,
                     onValueChange = { text ->
-                        modelId = text
+                        imageUrl = text
                     },
-                    label = { Text("Model id") },
+                    label = { Text("Image url") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
