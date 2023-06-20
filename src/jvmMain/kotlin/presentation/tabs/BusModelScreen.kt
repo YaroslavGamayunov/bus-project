@@ -54,6 +54,9 @@ fun BusModelScreen(busModels: List<BusModelEntity>) {
                         TableColumnDefinition {
                             Text("Image")
                         },
+                        TableColumnDefinition {
+                            Text("Count of buses")
+                        },
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -69,6 +72,9 @@ fun BusModelScreen(busModels: List<BusModelEntity>) {
                                     contentDescription = "",
                                     modifier = Modifier.height(80.dp).padding(10.dp)
                                 )
+                            }
+                            cell {
+                                Text(model.countOfBuses.toString())
                             }
                         }
                     }

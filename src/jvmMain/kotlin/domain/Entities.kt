@@ -7,7 +7,8 @@ data class BusEntity(
     val id: Int,
     val productionYear: Int,
     val modelName: String,
-    val modelImageUrl: String
+    val modelImageUrl: String,
+    val countOfTrips: Long
 )
 
 data class StopEntity(
@@ -27,6 +28,7 @@ data class RouteEntity(
 data class BusModelEntity(
     val name: String,
     val imageUrl: String,
+    val countOfBuses: Long,
     val id: Int
 )
 

@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import domain.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.statements.StatementContext
 import org.jetbrains.exposed.sql.statements.expandArgs
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -103,16 +104,34 @@ object BusRepository {
         }
     }
 
+    fun loadAllRoutesThroughStop(stopId: Int): List<Int> {
+        return transaction(DatabaseFactory.database) {
+            addLogger(MyStdOutSqlLogger("load_all_routes_through:"))
+            Join(Route, RouteStop, JoinType.INNER, onColumn = Route.id, otherColumn = RouteStop.routeId)
+                .selectAll()
+                .groupBy(RouteStop.id)
+                .having { RouteStop.stopId eq stopId }
+                .map {
+                    it[Route.id]
+                }
+        }
+    }
+
     private fun loadAllBuses(): List<BusEntity> {
         return transaction(DatabaseFactory.database) {
             addLogger(MyStdOutSqlLogger("load_all_buses:"))
-            (Bus innerJoin BusModel).selectAll()
+            val busWithBusModel = Join(Bus, BusModel, JoinType.INNER, onColumn = Bus.modelId, otherColumn = BusModel.id)
+            Join(busWithBusModel, Trip, JoinType.INNER, onColumn = Bus.id, otherColumn = Trip.busId)
+                .slice(Bus.id, Bus.productionYear, BusModel.modelName, BusModel.imageUrl, Trip.id.count())
+                .selectAll()
+                .groupBy(Bus.id)
                 .map { row ->
                     BusEntity(
                         id = row[Bus.id],
                         productionYear = row[Bus.productionYear],
                         modelName = row[BusModel.modelName],
-                        modelImageUrl = row[BusModel.imageUrl]
+                        modelImageUrl = row[BusModel.imageUrl],
+                        countOfTrips = row[Trip.id.count()]
                     )
                 }
         }
@@ -169,12 +188,16 @@ object BusRepository {
 
     private fun loadAllModels(): List<BusModelEntity> {
         return transaction(DatabaseFactory.database) {
-            BusModel.selectAll()
+            Join(BusModel, Bus, JoinType.INNER, onColumn = BusModel.id, otherColumn = Bus.modelId)
+                .slice(BusModel.id, BusModel.modelName, BusModel.imageUrl, Bus.id.count())
+                .selectAll()
+                .groupBy(BusModel.id)
                 .map {
                     BusModelEntity(
                         name = it[BusModel.modelName],
                         imageUrl = it[BusModel.imageUrl],
-                        id = it[BusModel.id]
+                        id = it[BusModel.id],
+                        countOfBuses = it[Bus.id.count()]
                     )
                 }
         }

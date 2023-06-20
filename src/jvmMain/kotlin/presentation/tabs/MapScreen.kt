@@ -241,6 +241,15 @@ fun MapScreen(stops: List<StopEntity>, routes: List<RouteEntity>) {
                                 )
 
                                 Text(
+                                    "select all routes through stop",
+                                    modifier = Modifier.clickable {
+                                        val ids = BusRepository.loadAllRoutesThroughStop(selectedStop!!.id)
+                                        routesToDraw = routes.filter { it.id in ids }
+                                        selectedStop = null
+                                    }
+                                )
+
+                                Text(
                                     "close",
                                     modifier = Modifier.clickable {
                                         selectedStop = null
