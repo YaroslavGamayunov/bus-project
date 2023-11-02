@@ -133,7 +133,7 @@ object BusRepository {
                         modelImageUrl = row[BusModel.imageUrl],
                         countOfTrips = row[Trip.id.count()]
                     )
-                }
+                }nejejej
         }
     }
 
