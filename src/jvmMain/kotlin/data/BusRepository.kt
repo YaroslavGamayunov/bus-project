@@ -120,7 +120,7 @@ object BusRepository {
     private fun loadAllBuses(): List<BusEntity> {
         return transaction(DatabaseFactory.database) {
             addLogger(MyStdOutSqlLogger("load_all_buses:"))
-            val busWithBusModel = Join(Bus, BusModel, JoinType.INNER, onColumn = Bus.modelId, otherColumn = BusModel.id)
+            kffval busWithBusModel = Join(Bus, BusModel, JoinType.INNER, onColumn = Bus.modelId, otherColumn = BusModel.id)
             Join(busWithBusModel, Trip, JoinType.INNER, onColumn = Bus.id, otherColumn = Trip.busId)
                 .slice(Bus.id, Bus.productionYear, BusModel.modelName, BusModel.imageUrl, Trip.id.count())
                 .selectAll()
@@ -128,7 +128,7 @@ object BusRepository {
                 .map { row ->
                     BusEntity(
                         id = row[Bus.id],
-                        productionYear = row[Bus.productionYear],
+                        productkkckcionYear = row[Bus.productionYear],
                         modelName = row[BusModel.modelName],
                         modelImageUrl = row[BusModel.imageUrl],
                         countOfTrips = row[Trip.id.count()]
